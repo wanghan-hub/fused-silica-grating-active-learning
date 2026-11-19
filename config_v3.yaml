@@ -1,0 +1,310 @@
+experiment:
+  id: silica_grating_v3_revision
+  repeat_seed_offsets:
+  - 0
+  - 10000
+  - 20000
+seed: 20260923
+paths:
+  output_root: outputs
+grid:
+  wavelengths_nm:
+    start: 450
+    stop: 850
+    step: 10
+  angles_deg:
+  - 0
+  - 10
+  - 20
+  - 30
+  - 40
+  polarizations:
+  - TE
+  - TM
+geometry:
+  design:
+    period_nm:
+    - 130
+    - 195
+    height_nm:
+    - 150
+    - 500
+    top_duty:
+    - 0.05
+    - 0.45
+    bottom_duty:
+    - 0.55
+    - 0.95
+  cover:
+    period_nm:
+    - 126.1
+    - 200.85
+    height_nm:
+    - 145.5
+    - 515
+    top_duty:
+    - 0.03
+    - 0.47
+    bottom_duty:
+    - 0.53
+    - 0.97
+  ood:
+    period_nm:
+    - 130
+    - 195
+    height_nm:
+    - 530
+    - 550
+    top_duty:
+    - 0.05
+    - 0.45
+    bottom_duty:
+    - 0.55
+    - 0.95
+  constraints:
+    min_top_nm: 20.0
+    min_gap_nm: 20.0
+    max_sidewall_deg: 20.0
+    require_zero_order: true
+    diffraction_angle_deg: 45.0
+    diffraction_margin: 0.005
+sampling:
+  method: sobol
+  block_size: 1024
+  max_candidates: 262144
+rcwa:
+  base:
+    harmonics: 20
+    nz: 64
+    nx: 4096
+    energy_tolerance: 1.0e-06
+    power_tolerance: 1.0e-08
+    order_sum_tolerance: 1.0e-09
+  reference:
+    harmonics: 25
+    nz: 96
+    nx: 8192
+    energy_tolerance: 1.0e-06
+    power_tolerance: 1.0e-08
+    order_sum_tolerance: 1.0e-09
+  reference_check:
+    harmonics: 30
+    nz: 128
+    nx: 16384
+    energy_tolerance: 1.0e-06
+    power_tolerance: 1.0e-08
+    order_sum_tolerance: 1.0e-09
+  retry:
+    max_retries: 1
+    growth: 1.5
+validation:
+  example_geometry:
+  - 180
+  - 300
+  - 0.25
+  - 0.75
+  convergence_geometries: 20
+  fresnel_tolerance: 1.0e-08
+  convergence_tolerance: 0.0001
+  probe_grid:
+    wavelengths_nm:
+    - 450
+    - 650
+    - 850
+    angles_deg:
+    - 0
+    - 20
+    - 40
+    polarizations:
+    - TE
+    - TM
+  sweeps:
+    harmonics:
+    - 10
+    - 15
+    - 20
+    - 25
+    - 30
+    nz:
+    - 24
+    - 40
+    - 64
+    - 96
+    nx:
+    - 1024
+    - 2048
+    - 4096
+    - 8192
+comsol:
+  initial_geometries: 2
+  absolute_tolerance: 0.0005
+  energy_tolerance: 1.0e-05
+  power_tolerance: 1.0e-08
+  grid:
+    wavelengths_nm:
+    - 450
+    - 550
+    - 650
+    - 750
+    - 850
+    angles_deg:
+    - 0
+    - 20
+    - 40
+    polarizations:
+    - TE
+    - TM
+dataset:
+  counts:
+    train_initial: 128
+    validation: 64
+    calibration: 64
+    iid: 128
+    ood: 64
+  workers: 4
+  blas_threads: 1
+  evaluation_solver: reference
+  require_initial_comsol: true
+model:
+  variants:
+  - r_only
+  - independent
+  - soft
+  - hard
+  primary_variant: hard
+  width: 128
+  layers: 4
+  ensemble_size: 5
+  bootstrap: true
+  device: auto
+  cpu_threads: 2
+  deterministic: true
+  epochs: 300
+  batch_size: 4096
+  predict_batch_size: 16384
+  learning_rate: 0.0003
+  weight_decay: 1.0e-05
+  energy_weight: 1.0
+  gradient_clip: 5.0
+  patience: 50
+  min_delta: 1.0e-09
+  normalization_floor: 1.0e-12
+  min_epochs: 50
+  loss_scale_floor: 1.0e-08
+  output_weight_scale: 0.1
+  log_every_epochs: 25
+  quality:
+    max_baseline_rmse_ratio: 0.8
+    max_member_median_ratio: 3.0
+calibration:
+  coverage: 0.95
+  sigma_floor: 1.0e-06
+active_learning:
+  strategies:
+  - random
+  - uncertainty
+  - task_diverse
+  rounds: 4
+  batch_geometries: 64
+  pool_size: 4096
+  prediction_geometry_batch: 128
+  performance_weight: 1.0
+  shortlist_factor: 5
+  diversity_score_weight: 0.1
+  probe_grid:
+    wavelengths_nm:
+      start: 450
+      stop: 850
+      step: 25
+    angles_deg:
+    - 0
+    - 20
+    - 40
+    polarizations:
+    - TE
+    - TM
+metrics:
+  wavelength_weighting: equal
+  angle_weighting: equal
+  polarization_weights:
+    TE: 0.5
+    TM: 0.5
+tolerance:
+  distribution: uniform
+  period_relative: 0.03
+  height_relative: 0.03
+  top_absolute: 0.02
+  bottom_absolute: 0.02
+optimization:
+  methods:
+  - random
+  - direct
+  - bo
+  - surrogate
+  objectives:
+  - nominal
+  - robust
+  model_directory: active_learning/task_diverse/round_004/model
+  enforce_tolerance_feasible: true
+  kappa: 1.0
+  uncertainty_penalty: 1.0
+  mc_samples: 16
+  mc_seed_offset: 500000
+  state_budget: 500000
+  search_evaluations: 384
+  de_population: 40
+  de_generations: 80
+  de_tolerance: 0.0001
+  verify_candidates: 10
+  representatives_per_method: 1
+  infeasible_penalty: 1000000.0
+  bo_pool_size: 4096
+  bo_initial: 16
+  bo_restarts: 1
+  bo_sigma_floor: 1.0e-09
+  bo_xi: 1.0e-05
+final_validation:
+  grid:
+    wavelengths_nm:
+      start: 450
+      stop: 850
+      step: 5
+    angles_deg:
+      start: 0
+      stop: 40
+      step: 5
+    polarizations:
+    - TE
+    - TM
+  mc_samples: 50
+  mc_seed_offset: 900000
+report:
+  bootstrap_samples: 2000
+  confidence: 0.95
+  dpi: 200
+  scatter_max_points: 10000
+  calibration_bins: 10
+  histogram_bins: 20
+  angular_wavelengths_nm:
+  - 450
+  - 650
+  - 850
+runtime:
+  rcwa_workers: auto
+  rcwa_blas_threads: 1
+  state_chunk_size: 8
+  log_interval_s: 30
+  stop_after_subtask: null
+reuse:
+  data_seed: 20260923
+  source_candidates: [inputs/v2_frozen]
+  sibling_repeat_cache: false
+confirmation_tests:
+  enabled: true
+  seed: 30260923
+
+revision:
+  source_run: outputs/silica_grating_v2_trainingfix/repeat_000
+  baseline: inputs/v2_frozen
+  optimizer_seeds: [20260923, 20270923, 20280923]
+  benchmark_model_repeat: 0

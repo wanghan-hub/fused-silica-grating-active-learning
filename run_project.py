@@ -1,4 +1,4 @@
-"""Unified CLI; --stage check and --help work without PyTorch or scientific packages."""
+"""Run the original study or the revision experiments."""
 from __future__ import annotations
 
 import argparse
@@ -192,7 +192,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--stage", required=True, choices=["check", "validate", "comsol", "dataset", "audit",
                         "prepare_v2", "training_check", "confirmation_tests",
                         "train", "calibrate", "active_learning", "optimize", "final_validation", "report"])
-    parser.add_argument("--config", type=Path, default=Path(__file__).with_name("config.yaml"))
+    parser.add_argument("--config", type=Path, default=Path(__file__).with_name("config_v2.yaml"))
     parser.add_argument("--experiment-id")
     parser.add_argument("--seed", type=int)
     parser.add_argument("--workers", help="Override runtime.rcwa_workers (positive integer or auto); no physical changes")
@@ -275,5 +275,7 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["--baseline"]:
+        raise SystemExit(main(sys.argv[2:]))
     from revision_cli import main as revision_main
     raise SystemExit(revision_main())
